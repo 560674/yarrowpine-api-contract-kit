@@ -1,0 +1,190 @@
+# CRUD resource
+# Template from Yarrowpine API Contract Kit by Yarrowpine Studio. Demo brand: YourBrand. All endpoints are fictional.
+openapi: 3.1.0
+info:
+  title: YourBrand Widgets API
+  version: 1.0.0
+  description: CRUD for one resource with shared error responses.
+servers:
+- url: https://api.example.com/v1
+  description: Production
+- url: https://sandbox.example.com/v1
+  description: Sandbox
+tags:
+- name: widgets
+  description: Widgets operations
+paths:
+  /widgets:
+    get:
+      operationId: listWidgets
+      summary: List widgets
+      tags:
+      - widgets
+      parameters:
+      - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: A list of widgets.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Widget'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+    post:
+      operationId: createWidget
+      summary: Create a widget
+      tags:
+      - widgets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WidgetInput'
+      responses:
+        '201':
+          description: Created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Widget'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /widgets/{id}:
+    parameters:
+    - $ref: '#/components/parameters/Id'
+    get:
+      operationId: getWidget
+      summary: Get a widget
+      tags:
+      - widgets
+      responses:
+        '200':
+          description: The widget.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Widget'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      operationId: updateWidget
+      summary: Update a widget
+      tags:
+      - widgets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WidgetInput'
+      responses:
+        '200':
+          description: Updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Widget'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      operationId: deleteWidget
+      summary: Delete a widget
+      tags:
+      - widgets
+      responses:
+        '204':
+          description: Deleted.
+        '404':
+          $ref: '#/components/responses/NotFound'
+components:
+  schemas:
+    Widget:
+      type: object
+      required:
+      - id
+      - name
+      - createdAt
+      properties:
+        id:
+          type: string
+          readOnly: true
+          example: wdg_123
+        name:
+          type: string
+          maxLength: 200
+          example: Blue widget
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: '2026-01-15T09:30:00Z'
+    WidgetInput:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+          maxLength: 200
+          example: Blue widget
+    Problem:
+      type: object
+      description: Error body in the Problem Details format (RFC 9457).
+      required:
+      - type
+      - title
+      - status
+      properties:
+        type:
+          type: string
+          format: uri
+          example: https://example.com/problems/not-found
+        title:
+          type: string
+          example: Resource not found
+        status:
+          type: integer
+          example: 404
+        detail:
+          type: string
+          example: No widget with id 42.
+        instance:
+          type: string
+          example: /widgets/42
+  responses:
+    BadRequest:
+      description: The request is invalid.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFound:
+      description: The resource does not exist.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      description: Resource identifier.
+      schema:
+        type: string
+        example: wdg_123
+    Limit:
+      name: limit
+      in: query
+      description: Maximum items to return.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20

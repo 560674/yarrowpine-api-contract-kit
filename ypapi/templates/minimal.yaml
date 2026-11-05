@@ -1,0 +1,67 @@
+# Minimal API
+# Template from Yarrowpine API Contract Kit by Yarrowpine Studio. Demo brand: YourBrand. All endpoints are fictional.
+openapi: 3.1.0
+info:
+  title: YourBrand Minimal API
+  version: 1.0.0
+  description: 'Smallest useful starting point: one health check.'
+servers:
+- url: https://api.example.com/v1
+  description: Production
+- url: https://sandbox.example.com/v1
+  description: Sandbox
+tags:
+- name: system
+  description: System operations
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      summary: Check service health
+      tags:
+      - system
+      responses:
+        '200':
+          description: Service is up.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+        default:
+          description: Unexpected error.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+components:
+  schemas:
+    Health:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+    Problem:
+      type: object
+      description: Error body in the Problem Details format (RFC 9457).
+      required:
+      - type
+      - title
+      - status
+      properties:
+        type:
+          type: string
+          format: uri
+          example: https://example.com/problems/not-found
+        title:
+          type: string
+          example: Resource not found
+        status:
+          type: integer
+          example: 404
+        detail:
+          type: string
+          example: No widget with id 42.
+        instance:
+          type: string
+          example: /widgets/42

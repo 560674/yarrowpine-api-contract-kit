@@ -1,0 +1,214 @@
+# Problem Details errors
+# Template from Yarrowpine API Contract Kit by Yarrowpine Studio. Demo brand: YourBrand. All endpoints are fictional.
+openapi: 3.1.0
+info:
+  title: YourBrand Errors API
+  version: 1.0.0
+  description: Shows one consistent error format (RFC 9457 Problem Details) used by every operation.
+servers:
+- url: https://api.example.com/v1
+  description: Production
+- url: https://sandbox.example.com/v1
+  description: Sandbox
+tags:
+- name: orders
+  description: Orders operations
+paths:
+  /orders:
+    get:
+      operationId: listOrders
+      summary: List orders
+      tags:
+      - orders
+      parameters:
+      - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: A list of orders.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      operationId: createOrder
+      summary: Create a order
+      tags:
+      - orders
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderInput'
+      responses:
+        '201':
+          description: Created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /orders/{id}:
+    parameters:
+    - $ref: '#/components/parameters/Id'
+    get:
+      operationId: getOrder
+      summary: Get a order
+      tags:
+      - orders
+      responses:
+        '200':
+          description: The order.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      operationId: updateOrder
+      summary: Update a order
+      tags:
+      - orders
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderInput'
+      responses:
+        '200':
+          description: Updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      operationId: deleteOrder
+      summary: Delete a order
+      tags:
+      - orders
+      responses:
+        '204':
+          description: Deleted.
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+components:
+  schemas:
+    Order:
+      type: object
+      required:
+      - id
+      - name
+      - createdAt
+      properties:
+        id:
+          type: string
+          readOnly: true
+          example: wdg_123
+        name:
+          type: string
+          maxLength: 200
+          example: Blue widget
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+          example: '2026-01-15T09:30:00Z'
+    OrderInput:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+          maxLength: 200
+          example: Blue widget
+    Problem:
+      type: object
+      description: Error body in the Problem Details format (RFC 9457).
+      required:
+      - type
+      - title
+      - status
+      properties:
+        type:
+          type: string
+          format: uri
+          example: https://example.com/problems/not-found
+        title:
+          type: string
+          example: Resource not found
+        status:
+          type: integer
+          example: 404
+        detail:
+          type: string
+          example: No widget with id 42.
+        instance:
+          type: string
+          example: /widgets/42
+  responses:
+    BadRequest:
+      description: The request is invalid.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFound:
+      description: The resource does not exist.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Conflict:
+      description: The request conflicts with the current state.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    ServerError:
+      description: Unexpected server error.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      description: Resource identifier.
+      schema:
+        type: string
+        example: wdg_123
+    Limit:
+      name: limit
+      in: query
+      description: Maximum items to return.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
