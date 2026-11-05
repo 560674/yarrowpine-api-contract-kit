@@ -1,0 +1,36 @@
+# Deliberately broken example for trying the checker: ypapi lint examples/bad-api.yaml
+openapi: 3.1.0
+info:
+  title: YourBrand Broken API
+servers:
+  - url: http://api.example.com
+tags:
+  - name: users
+paths:
+  /users/:
+    get:
+      operationId: list_users
+      tags: [people]
+      responses:
+        "200":
+          description: Users.
+  /users/{userId}:
+    get:
+      operationId: list_users
+      summary: Get a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: {type: string}
+      security:
+        - session: []
+      responses:
+        "404":
+          $ref: "#/components/responses/Missing"
+components:
+  schemas:
+    Unused:
+      type: object
+      properties:
+        name: {type: string}
